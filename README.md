@@ -6,7 +6,7 @@
 - [Usage](#usage)
 - [License](#license)
 - [Credits](#credits)
-- [Contact Information](#contact Information)
+- [Questions](#questions)
 
 ## Installation
 
@@ -39,7 +39,7 @@ None
 
   
 
-## Contact Information
+## Questions
 
   
   
