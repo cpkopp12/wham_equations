@@ -2,11 +2,11 @@
 ## Description
 ## Table of Contents
 - [Description](#description)
-- [Installation](#installation
+- [Installation](#installation)
 - [Usage](#usage)
 - [License](#license)
 - [Credits](#credits)
-- [Contact Information](#contact information)
+- [Contact Information](#contact Information)
 
 ## Installation
 
