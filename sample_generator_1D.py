@@ -91,6 +91,14 @@ class SampleConstructor1D:
         
         return rho
     
+    def xp1nverseSinSq(self, x):
+        """
+        test distribution that could work a bit better
+        """
+
+        rho = (1/(x+1))*(sin(x)**2)
+        return rho
+    
     #generate the histogram using xSinSq distribution
     def dataGen1D(self):
         """
@@ -102,16 +110,17 @@ class SampleConstructor1D:
         #each simulation will be centered around an element of the
         #array simc, called mu after gaussian convention
         for mu in self.simc:
-            
+            # calculate a range of values from mu 4 stdvs away from gaussian
+            xtrange = 4/sqrt(self.K)
             print(mu)
             i = 0        #accepted sample counter = i
             
             #loop over accept-reject while i < sampleNumber
             while(i < self.N):
                 #test point
-                xt = r.uniform(self.xmn, self.xmx)
+                xt = r.uniform(mu - xtrange, mu + xtrange)
                 #biased prob dist of test point
-                rhoxt = self.biasV(xt,mu)*self.xSinSq(xt) 
+                rhoxt = self.biasV(xt,mu)*self.xp1nverseSinSq(xt) 
                 #random 0-fmax
                 y = r.uniform(0,fmax)
                 #if the prob dist of the test point is greater than
@@ -130,14 +139,33 @@ class SampleConstructor1D:
                         hi = int(histbin)
                         self.hist[hi] = self.hist[hi] + 1
             
-            figure()
-            plot(self.bc,self.hist)
-            xlable('x')
-            ylable('histogram(x)')
-            title('')
-            show()
-            
-            return self.hist
+        figure()
+        plot(self.bc, self.hist)
+        xlabel('x')
+        ylabel('histogram(x)')
+        title('')
+        show()
+        
+        return self.hist
+    
+    #funnction to write histogram data to txt file
+    def writeToFile(self, funcUsed):
+        """
+        formats a file name from class parameters and writes histogram
+        data to a txt file in same folder, funcUsed is the name of the 
+        distribution function used to generate the data
+
+        """
+        filename = "xmn{}_xmx{}_simNum{}_bs{}_k{}_n{}_{}".format(self.xmn,
+                    self.xmx, self.sNum, self.bs, self.K, self.N, funcUsed)
+        
+        with open(filename,'w') as myfile:
+            for x in self.bi:
+                myfile.write('{} '.format(self.hist[x]))
+                
+        myfile.close()
+        
+        return
                     
                 
                 
@@ -159,11 +187,13 @@ class SampleConstructor1D:
 xmn = 0
 xmx = 5
 simnum = 100
-binsize = 1/100
-spK = 0.05
+binsize = 1/200
+spK = 16
 sampnum = 100000
 
 testGen = SampleConstructor1D(xmn, xmx, simnum, binsize, spK, sampnum)
-testGen.dataGen1D()
+firsthist = testGen.dataGen1D()
+testGen.writeToFile('xp1nverseSinSq')
+
 
         
