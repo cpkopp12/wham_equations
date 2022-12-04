@@ -156,7 +156,7 @@ class SampleConstructor1D:
         distribution function used to generate the data
 
         """
-        filename = "xmn{}_xmx{}_simNum{}_bs{}_k{}_n{}_{}".format(self.xmn,
+        filename = "xmn{}_xmx{}_simNum{}_bs{}_k{}_n{}_{}.txt".format(self.xmn,
                     self.xmx, self.sNum, self.bs, self.K, self.N, funcUsed)
         
         with open(filename,'w') as myfile:
@@ -187,7 +187,7 @@ class SampleConstructor1D:
 xmn = 0
 xmx = 5
 simnum = 100
-binsize = 1/200
+binsize = 1/250
 spK = 16
 sampnum = 100000
 
