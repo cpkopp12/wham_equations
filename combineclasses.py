@@ -604,7 +604,7 @@ class WhamEqs1D(SampleConstructor):
         h1 = self.hk + hcalc6 - hcalc5
         self.hk1 = h1
         
-        return h1
+        return h1 # ********GOING T0 RETURN ALL P1 ARRAYS HERE **************
         
     # BFGS method
     def gjBFGSCalc(self,llim,ltol,a0,t,b,iterationlimit,ploti):

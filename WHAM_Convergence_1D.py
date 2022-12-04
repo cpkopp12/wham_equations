@@ -210,7 +210,8 @@ class WhamConvergence1D:
     
     
     #Backtracking Armijo Line Search
-    def lineSearch(self, alpha0, tao, beta, hess, dOpt, iterationLimit):
+    def lineSearch(self, alpha0, tao, beta, hessian, dgiOptFunc,
+                   bfgsLoopIteration, iterationLimit):
         """
         alpha0 : float
             Initial length of line search along search direction
@@ -220,11 +221,14 @@ class WhamConvergence1D:
             coeficient in front of the Armijo condition, smaller factor means
             the function decreases less at each step, but a larger factor may
             make the number of iterations required at each step impractical
-        hess : matrix(size(self.gi) X size(self.gi)))
+        hessian : matrix(size(self.gi) X size(self.gi)))
             used in BFGS algorithm to calculate search direction
-        dOpt : array(size(self.gi))
+        dgiOptFunc : array(size(self.gi))
             derivative of the optimization constant, calculated with
             self.dgiOptFuncCalc() method
+        bfgsLoopIteration: it is useful to know what iteration the outer
+            BFGS loop is up to, incase we want to periodically check contents
+            of this function
         iterationLimit : int
             maximum number of backtracking iterations before the function
             returns a value which does not satisfy the armijo condition
@@ -238,10 +242,51 @@ class WhamConvergence1D:
 
         """
         #initialize parameters
-        al0 = alpha0
+        a0 = alpha0
         t = tao
         b = beta
+        H = hessian
+        dgiA = dgiOptFunc
+        bfgsi = bfgsLoopIteration
         iLim = iterationLimit
+        gi0 = self.gi
+        
+        #pk is the line search vector
+        pk = -1*dot(H,dgiA)
+        print('pk')
+        print(pk)
+        
+        #tolerance for armijo condition: f(x+(alpha * pk)) < f(x) + tol
+        tol = b * dot(dgiA.T,pk)
+        A0 = self.optFuncCalc(gi0)
+        ATol = A0 + (a0 * tol)
+        
+        #calculate test gi by adding (alpha*pk)
+        giTest = gi0 + (a0*pk)
+        print('gi0: ',gi0)
+        print('giTest: ', giTest)
+        ATest = self.optFuncCalc(giTest)
+        print('ATol0: ', ATol)
+        print('ATest: ', ATest)
+        #loop index
+        l = 0
+        al = a0
+        while(ATol < ATest) and (l < iLim):
+            l = l + 1
+            alp1 = t * al
+            giTest = gi0 + (alp1 * pk)
+            ATest = self.optFuncCalc(giTest)
+            ATol = A0 + (alp1 * tol)
+            al = alp1
+            print('l: ', l)
+            print('ATest: ', ATest)
+            print('ATol: ', ATol)
+        
+        print('gi0: ', gi0)
+        print('giTest: ', giTest)
+        print('diff: ',gi0-giTest)
+        
+        self.gi = giTest
         
         
         
@@ -267,22 +312,23 @@ class WhamConvergence1D:
 # fname = 'xmn0_xmx5_simNum10_bs0.05_k4_n1000_xp1nverseSinSq.txt'  
 # =============================================================================
 
+xmn = 0
+xmx = 5
+simnum = 200
+binsize = 1/500
+spK = 16
+sampnum = 100000  
+fname = "xmn0_xmx5_simNum200_bs0.002_k16_n100000_xp1nverseSinSq.txt"
+
 # =============================================================================
 # xmn = 0
 # xmx = 5
-# simnum = 200
-# binsize = 1/500
-# spK = 16
-# sampnum = 100000  
+# simnum = 50
+# binsize = 1/125
+# spK = 9
+# sampnum = 10000
+# fname = 'xmn0_xmx5_simNum50_bs0.008_k9_n10000_xp1nverseSinSq.txt'
 # =============================================================================
-
-xmn = 0
-xmx = 5
-simnum = 50
-binsize = 1/125
-spK = 9
-sampnum = 10000
-fname = 'xmn0_xmx5_simNum50_bs0.008_k9_n10000_xp1nverseSinSq.txt'
 
 tW = WhamConvergence1D(xmn,xmx,simnum,binsize,spK,sampnum,fname)
 tW.giSetGuess()
@@ -291,6 +337,14 @@ print(optCalcTest)
 dOptTest = tW.dgiOptFuncCalc(tW.gi)
 print(dOptTest)
 print(tW.gi)
+
+hess0 = identity(size(tW.gi))
+a0c = 2
+betac = 0.000001
+taoc = 0.5
+il = 15000
+
+tW.lineSearch(a0c, taoc, betac, hess0, dOptTest, 0, il)
 
    
         
