@@ -70,6 +70,7 @@ class SampleConstructor1D:
         mu is the coordinate of the center of the biasing potential
         """
         #DEFINE CONSTANTS
+       
         c1 = self.K/2
         c2 = sqrt(c1/math.pi)
         
@@ -106,12 +107,14 @@ class SampleConstructor1D:
         for details read pdf
 
         """
+        c1 = self.K/2
+        xtrange = 4/sqrt(c1)
         fmax = 1
         #each simulation will be centered around an element of the
         #array simc, called mu after gaussian convention
         for mu in self.simc:
             # calculate a range of values from mu 4 stdvs away from gaussian
-            xtrange = 4/sqrt(self.K)
+            
             print(mu)
             i = 0        #accepted sample counter = i
             
@@ -123,6 +126,60 @@ class SampleConstructor1D:
                 rhoxt = self.biasV(xt,mu)*self.xp1nverseSinSq(xt) 
                 #random 0-fmax
                 y = r.uniform(0,fmax)
+                #if the prob dist of the test point is greater than
+                #random 0-fmax, accept the point
+                if rhoxt > y:
+                    #accept sample even if it is not in xmn-xmx
+                    i = i + 1
+                    if (i == floor(self.N/2)):
+                        print('1/2 way')
+                    if (xt < self.xmx) and (xt > self.xmn):
+                        #add accepted point to the correct bin
+                        #convert from float to int
+                        histbinf = (xt/self.bs)
+                        histbin = floor(histbinf)
+                        #hi is the histogram index that xt corresponds to
+                        hi = int(histbin)
+                        self.hist[hi] = self.hist[hi] + 1
+            
+        figure()
+        plot(self.bc, self.hist)
+        xlabel('x')
+        ylabel('histogram(x)')
+        title('')
+        show()
+        
+        return self.hist
+    
+    def dataGen1D_v2(self):
+        """
+        Relying on an Acceptance-Rejection algorithm to generate the data,
+        for details read pdf, 
+        _v2: utilized the fact that (the biasing potential) *
+        (the probability distribution) will always be less than the biasing
+        potential alone, seeing as the prob dist is defined as less than one,
+        improves speed drastically
+
+        """
+        c1 = self.K/2
+        xtrange = 4/sqrt(c1)
+        stdev = 1/sqrt(self.K)
+        #each simulation will be centered around an element of the
+        #array simc, called mu after gaussian convention
+        for mu in self.simc:
+            # calculate a range of values from mu 4 stdvs away from gaussian
+            
+            print(mu)
+            i = 0        #accepted sample counter = i
+            
+            #loop over accept-reject while i < sampleNumber
+            while(i < self.N):
+                #test point
+                xt = r.normal(mu,stdev)
+                #biased prob dist of test point
+                rhoxt = self.biasV(xt,mu)*self.xp1nverseSinSq(xt) 
+                #random 0-fmax
+                y = r.uniform(0,self.biasV(xt, mu))
                 #if the prob dist of the test point is greater than
                 #random 0-fmax, accept the point
                 if rhoxt > y:
@@ -186,13 +243,13 @@ class SampleConstructor1D:
 
 xmn = 0
 xmx = 5
-simnum = 100
-binsize = 1/250
-spK = 16
-sampnum = 100000
+simnum = 50
+binsize = 1/125
+spK = 9
+sampnum = 10000
 
 testGen = SampleConstructor1D(xmn, xmx, simnum, binsize, spK, sampnum)
-firsthist = testGen.dataGen1D()
+firsthist = testGen.dataGen1D_v2()
 testGen.writeToFile('xp1nverseSinSq')
 
 

@@ -87,15 +87,13 @@ class WhamConvergence1D:
         
         #class constructor will automatically plot the histogram data and
         #save the png file with the same name as the txt file
-# =============================================================================
-#         figure()
-#         plot(self.bc, self.hist)
-#         xlabel('x')
-#         ylabel('histogram(x)')
-#         title('Histogram Data From File')
-#         savefig(pngFileName)
-#         show()
-# =============================================================================
+        figure()
+        plot(self.bc, self.hist)
+        xlabel('x')
+        ylabel('histogram(x)')
+        title('Histogram Data From File')
+        savefig(pngFileName)
+        show()
         
         #initialize bjasing matrix for the grid as a 2d array with dimensions
         #of (number of simulations) x (number of bins), zeros for now (float)
@@ -116,11 +114,10 @@ class WhamConvergence1D:
         """
         #constants for biasing potential
         k = self.K/2
-        kbT = 1.28010*(10^-23)*298
         
         for i in self.simi:
             for j in self.bj:
-                self.Cij[i][j] = exp(-k*((self.simc[i]-self.bc[j])**2)/kbT)
+                self.Cij[i][j] = exp(-k*((self.simc[i]-self.bc[j])**2))
                 
         return
                 
@@ -150,6 +147,107 @@ class WhamConvergence1D:
             self.gi[i] = log(fi[i])   
         
         return
+    
+    #WHAM optimization function calc
+    def optFuncCalc(self, g):
+        """
+        calculates the optimization function for the WHAM equations, eq(19)
+        of Hummer and Zhu,
+        parameter g comes from the fact that in the line search we will be 
+        passing test values for g, and we can always pass in self.gi as this
+        parameter,
+        returns a float
+        """
+        
+        sum1 = 0
+        sum2 = 0
+        
+        for i in self.simi:
+            sum1 = sum1 + (self.N*g[i])
+            
+        for j in self.bj:
+            if (self.hist[j] != 0):
+                sum3 = 0
+                for i in self.simi:
+                    sum3 = sum3 + (self.N*self.Cij[i][j]*exp(g[i]))
+                if (sum3 != 0):
+                    sum2 = sum2 + (self.hist[j]*log(self.hist[j]/sum3))
+        
+        #Result of the calculation is the negative sum of the two summations
+        optFunc = -sum1-sum2
+        
+        return optFunc   
+    
+    #Line search requires the derivative of the opt fuct with respect to gi
+    def dgiOptFuncCalc(self, g):
+        """
+        calculates the derivative of the optimization function with respect to
+        the elements of g, so this function returns an array floats of size
+        self.gi
+        """
+        #initialize return array
+        dOptFunc = zeros(size(self.gi))
+        
+        for i in self.simi:
+            sum1 = 0 
+            for j in self.bj:
+                if (self.hist[j] != 0):
+                    sum2 = 0
+                    for i2 in self.simi:
+                        sum2 = sum2 + (self.N*exp(g[i2]*self.Cij[i2][j]))
+                    if (sum2 != 0):
+                        if (j == 5) and (i == 1):
+                            print('sum2')
+                            print(sum2)
+                        sum1 = sum1 + ((self.hist[j]*self.Cij[i][j])/sum2)
+            #calculate the ith element of the derivaitive of the 
+            # optimization function            
+            dOptFunc[i] = (self.N * (exp(g[i]) * sum1)) - self.N
+                           
+        
+        return dOptFunc
+    
+    
+    
+    #Backtracking Armijo Line Search
+    def lineSearch(self, alpha0, tao, beta, hess, dOpt, iterationLimit):
+        """
+        alpha0 : float
+            Initial length of line search along search direction
+        tao : float in (0,1)
+            Length of line search decreases by this factor on each iteration
+        beta : float in (0,1)
+            coeficient in front of the Armijo condition, smaller factor means
+            the function decreases less at each step, but a larger factor may
+            make the number of iterations required at each step impractical
+        hess : matrix(size(self.gi) X size(self.gi)))
+            used in BFGS algorithm to calculate search direction
+        dOpt : array(size(self.gi))
+            derivative of the optimization constant, calculated with
+            self.dgiOptFuncCalc() method
+        iterationLimit : int
+            maximum number of backtracking iterations before the function
+            returns a value which does not satisfy the armijo condition
+
+        Returns
+        -------
+        self.gi which is closer to minimizing the optimation function than 
+        before, because we're using the self.gi we don't actually return
+        it from the function,
+        
+
+        """
+        #initialize parameters
+        al0 = alpha0
+        t = tao
+        b = beta
+        iLim = iterationLimit
+        
+        
+        
+        return
+        
+                                    
                 
         
         
@@ -159,17 +257,42 @@ class WhamConvergence1D:
 # %% 
 #TEST CELL
         
-xmin = 0
-xmax = 5
-snum = 100
-bsize = 1/250
-spK = 16
-sampnum = 100000
-fname = 'xmn0_xmx5_simNum100_bs0.004_k16_n100000_xp1nverseSinSq.txt'    
+# =============================================================================
+# xmn = 0
+# xmx = 5
+# simnum = 10
+# binsize = 1/20
+# spK = 4
+# sampnum = 1000
+# fname = 'xmn0_xmx5_simNum10_bs0.05_k4_n1000_xp1nverseSinSq.txt'  
+# =============================================================================
 
-tW = WhamConvergence1D(xmin,xmax,snum,bsize,spK,sampnum,fname)
-print(tW.giSetGuess()) 
-        
+# =============================================================================
+# xmn = 0
+# xmx = 5
+# simnum = 200
+# binsize = 1/500
+# spK = 16
+# sampnum = 100000  
+# =============================================================================
+
+xmn = 0
+xmx = 5
+simnum = 50
+binsize = 1/125
+spK = 9
+sampnum = 10000
+fname = 'xmn0_xmx5_simNum50_bs0.008_k9_n10000_xp1nverseSinSq.txt'
+
+tW = WhamConvergence1D(xmn,xmx,simnum,binsize,spK,sampnum,fname)
+tW.giSetGuess()
+optCalcTest = tW.optFuncCalc(tW.gi)
+print(optCalcTest)
+dOptTest = tW.dgiOptFuncCalc(tW.gi)
+print(dOptTest)
+print(tW.gi)
+
+   
         
         
         
