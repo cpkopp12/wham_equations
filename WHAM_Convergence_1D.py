@@ -136,6 +136,7 @@ class WhamConvergence1D:
             self.setBiasMatrix()
         
         #need some way to guess an original probability distribution
+        #using 5*N because only nearest sims acutually contribute
         pd = array(size(self.hist),dtype=float)
         pd = self.hist/(self.sNum*self.N)
         
@@ -197,7 +198,7 @@ class WhamConvergence1D:
                 if (self.hist[j] != 0):
                     sum2 = 0
                     for i2 in self.simi:
-                        sum2 = sum2 + (self.N*exp(g[i2]*self.Cij[i2][j]))
+                        sum2 = sum2 + (self.N*exp(g[i2])*self.Cij[i2][j])
                     if (sum2 != 0):
                         # if (j == 5) and (i == 1):
                         #     print('sum2')
@@ -254,12 +255,12 @@ class WhamConvergence1D:
         gi0 = gik
         
         #pk is the line search vector
-        pk = -1*dot(H,dgiA)
+        pk = -1*inner(H,dgiA)
         # print('pk')
         # print(pk)
         
         #tolerance for armijo condition: f(x+(alpha * pk)) < f(x) + tol
-        tol = b * dot(dgiA.T,pk)
+        tol = b * inner(dgiA,pk)
         A0 = self.optFuncCalc(gi0)
         ATol = A0 + (a0 * tol)
         
@@ -399,30 +400,31 @@ class WhamConvergence1D:
 # %% 
 #TEST CELL
         
+xmn = 0
+xmx = 3
+simnum = 10
+binsize = 1/50
+spK = 2
+sampnum = 100000
+fname = "data-files/xmn0_xmx3_simNum10_bs0.02_k2_n100000_xp1nverseSinSq2x.txt"
+
+
+
 # =============================================================================
 # xmn = 0
 # xmx = 3
-# simnum = 300
-# binsize = 1/500
-# spK = 49
+# simnum = 150
+# binsize = 1/250
+# spK = 36
 # sampnum = 100000
-# fname = 'data-files/xmn0_xmx3_simNum300_bs0.002_k49_n100000_xp1nverseSinSq2x.txt'  
+# fname ='data-files/xmn0_xmx3_simNum150_bs0.004_k36_n100000_xp1nverseSinSq2x.txt'
 # =============================================================================
-
-
-xmn = 0
-xmx = 3
-simnum = 150
-binsize = 1/250
-spK = 36
-sampnum = 100000
-fname ='data-files/xmn0_xmx3_simNum150_bs0.004_k36_n100000_xp1nverseSinSq2x.txt'
 
 tW = WhamConvergence1D(xmn,xmx,simnum,binsize,spK,sampnum,fname)
 tW.giSetGuess()
 
-a0c = 2
-betac = 0.99
+a0c = 1
+betac = 0.001
 taoc = 0.9
 il = 15000
 tW.BFGSConvergence(a0c, taoc, betac, il, 5, .01)
