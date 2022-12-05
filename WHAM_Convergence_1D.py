@@ -137,7 +137,7 @@ class WhamConvergence1D:
         
         #need some way to guess an original probability distribution
         pd = array(size(self.hist),dtype=float)
-        pd = self.hist/(self.N)
+        pd = self.hist/(self.sNum*self.N)
         
         #from guess at probability distribution, calc normalization constants
         fi = zeros(size(self.simi))
@@ -213,8 +213,8 @@ class WhamConvergence1D:
     
     
     #Backtracking Armijo Line Search
-    def lineSearch(self, alpha0, tao, beta, hessian, dgiOptFunc,
-                   bfgsLoopIteration, iterationLimit):
+    def lineSearch(self, alpha0, tao, beta, hessian, gik, dgiOptFunc,
+                   iterationLimit):
         """
         alpha0 : float
             Initial length of line search along search direction
@@ -226,12 +226,11 @@ class WhamConvergence1D:
             make the number of iterations required at each step impractical
         hessian : matrix(size(self.gi) X size(self.gi)))
             used in BFGS algorithm to calculate search direction
+        gik : array(size(self.gi))
+            current value of gi before line search
         dgiOptFunc : array(size(self.gi))
             derivative of the optimization constant, calculated with
             self.dgiOptFuncCalc() method
-        bfgsLoopIteration: it is useful to know what iteration the outer
-            BFGS loop is up to, incase we want to periodically check contents
-            of this function
         iterationLimit : int
             maximum number of backtracking iterations before the function
             returns a value which does not satisfy the armijo condition
@@ -251,12 +250,11 @@ class WhamConvergence1D:
         b = beta
         H = hessian
         dgiA = dgiOptFunc
-        bfgsi = bfgsLoopIteration
         iLim = iterationLimit
-        gi0 = self.gi
+        gi0 = gik
         
         #pk is the line search vector
-        pk = dot(H,dgiA)
+        pk = -1*dot(H,dgiA)
         # print('pk')
         # print(pk)
         
@@ -292,7 +290,7 @@ class WhamConvergence1D:
         
         self.gi = giTest
         
-        return gi0, giTest
+        return giTest
     
     #UPDATE HESSIAN MATRIX (BFGS)
     def updateHessian(self, Hk, gik, gikp1, dgiAk, dgiAkp1):
@@ -334,6 +332,63 @@ class WhamConvergence1D:
         
         
         return Hkp1
+    
+    
+    #BFGS LOOP
+    def BFGSConvergence(self, alpha0, tao, beta, lineSearchItLim,
+                        bfgsItLim, bfgsTol):
+        """
+        alpha0, tao, beta, lineSearchItLim are all passed to the line search
+        function,
+        bfgsItLim sets a limit on how the loop iteration
+        bfgsTol sets the convergence accuracy
+        """
+        #loop constants
+        tol = bfgsTol
+        er = tol * 10 
+        qlim = bfgsItLim
+        q = 0
+        lsLim = lineSearchItLim
+        
+        #initial values for arrays
+        Hk = identity(size(self.gi),dtype=float)
+        Hkp1 = identity(size(self.gi),dtype=float)
+        gik = self.gi
+        gikp1 = zeros(size(self.gi),dtype=float)
+        dgiAk = self.dgiOptFuncCalc(gik)
+        dgiAkp1 = zeros(size(self.gi),dtype=float)
+        
+        #start loop
+        while (q < qlim) and (abs(er) > tol):
+            q = q + 1
+            
+            #first call line search to get gikp1
+            gikp1 = self.lineSearch(alpha0, tao, beta, Hk, gik, dgiAk, lsLim)
+            #get gradiant for new gi value
+            dgiAkp1 = self.dgiOptFuncCalc(gikp1)
+            #update the inverse hessian
+            Hkp1 = self.updateHessian(Hk, gik, gikp1, dgiAk, dgiAkp1)
+            
+            #calculate optFunc for gik and gikp1 for er
+            Agik = self.optFuncCalc(gik)
+            Agikp1 = self.optFuncCalc(gikp1)
+            print('Agik :', Agik)
+            print('Agikp1 :', Agikp1)
+            er = Agikp1 - Agik
+            print('error: ', er)
+            
+            #set the kp1 vars to the k vars
+            Hk = Hkp1
+            gik = gikp1
+            dgiAk = dgiAkp1
+        
+        
+        
+        
+        
+        
+        return
+        
                                     
                 
         
@@ -346,58 +401,31 @@ class WhamConvergence1D:
         
 # =============================================================================
 # xmn = 0
-# xmx = 5
-# simnum = 10
-# binsize = 1/20
-# spK = 4
-# sampnum = 1000
-# fname = 'xmn0_xmx5_simNum10_bs0.05_k4_n1000_xp1nverseSinSq.txt'  
-# =============================================================================
-
-# =============================================================================
-# xmn = 0
-# xmx = 5
-# simnum = 200
+# xmx = 3
+# simnum = 300
 # binsize = 1/500
-# spK = 16
-# sampnum = 100000  
-# fname = "xmn0_xmx5_simNum200_bs0.002_k16_n100000_xp1nverseSinSq.txt"
-# 
+# spK = 49
+# sampnum = 100000
+# fname = 'data-files/xmn0_xmx3_simNum300_bs0.002_k49_n100000_xp1nverseSinSq2x.txt'  
 # =============================================================================
 
-# =============================================================================
-# xmn = 0
-# xmx = 5
-# simnum = 50
-# binsize = 1/125
-# spK = 9
-# sampnum = 10000
-# fname = 'data-files/xmn0_xmx5_simNum50_bs0.008_k9_n10000_xp1nverseSinSq.txt'
-# =============================================================================
 
 xmn = 0
 xmx = 3
 simnum = 150
-binsize = 1/200
-spK = 25
+binsize = 1/250
+spK = 36
 sampnum = 100000
-fname ='data-files/xmn0_xmx3_simNum150_bs0.005_k25_n100000_xp1nverseSinSq2x.txt'
+fname ='data-files/xmn0_xmx3_simNum150_bs0.004_k36_n100000_xp1nverseSinSq2x.txt'
 
 tW = WhamConvergence1D(xmn,xmx,simnum,binsize,spK,sampnum,fname)
 tW.giSetGuess()
 
-
-hess0 = identity(size(tW.gi))
 a0c = 2
-betac = 0.1
-taoc = 0.5
+betac = 0.99
+taoc = 0.9
 il = 15000
-dg0 = tW.dgiOptFuncCalc(tW.gi)
-g0, gp1 = tW.lineSearch(a0c, taoc, betac, hess0, dg0, 0, il)
-dg1 = tW.dgiOptFuncCalc(gp1)
-Hp1 = tW.updateHessian(hess0, g0, gp1, dg0, dg1)
-print(Hp1[:10,:2])
-
+tW.BFGSConvergence(a0c, taoc, betac, il, 5, .01)
 
 
 

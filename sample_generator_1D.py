@@ -115,8 +115,8 @@ class SampleConstructor1D:
         for details read pdf
 
         """
-        c1 = self.K/2
-        xtrange = 4/sqrt(c1)
+        
+        xtrange = 4/sqrt(self.K)
         fmax = 1
         #each simulation will be centered around an element of the
         #array simc, called mu after gaussian convention
@@ -169,8 +169,8 @@ class SampleConstructor1D:
         improves speed drastically
 
         """
-        c1 = self.K/2
-        xtrange = 4/sqrt(c1)
+        
+        
         stdev = 1/sqrt(self.K)
         #each simulation will be centered around an element of the
         #array simc, called mu after gaussian convention
@@ -251,9 +251,9 @@ class SampleConstructor1D:
 
 xmn = 0
 xmx = 3
-simnum = 150
-binsize = 1/200
-spK = 25
+simnum = 300
+binsize = 1/500
+spK = 49
 sampnum = 100000
 
 testGen = SampleConstructor1D(xmn, xmx, simnum, binsize, spK, sampnum)
