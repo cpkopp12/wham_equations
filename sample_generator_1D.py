@@ -100,6 +100,14 @@ class SampleConstructor1D:
         rho = (1/(x+1))*(sin(x)**2)
         return rho
     
+    def xp1nverseSinSq2x(self, x):
+        """
+        test distribution that could work a bit better
+        """
+
+        rho = (1/(x+1))*(sin(2*x)**2)
+        return rho
+    
     #generate the histogram using xSinSq distribution
     def dataGen1D(self):
         """
@@ -177,7 +185,7 @@ class SampleConstructor1D:
                 #test point
                 xt = r.normal(mu,stdev)
                 #biased prob dist of test point
-                rhoxt = self.biasV(xt,mu)*self.xp1nverseSinSq(xt) 
+                rhoxt = self.biasV(xt,mu)*self.xp1nverseSinSq2x(xt) 
                 #random 0-fmax
                 y = r.uniform(0,self.biasV(xt, mu))
                 #if the prob dist of the test point is greater than
@@ -213,7 +221,7 @@ class SampleConstructor1D:
         distribution function used to generate the data
 
         """
-        filename = "xmn{}_xmx{}_simNum{}_bs{}_k{}_n{}_{}.txt".format(self.xmn,
+        filename = "data-files/xmn{}_xmx{}_simNum{}_bs{}_k{}_n{}_{}.txt".format(self.xmn,
                     self.xmx, self.sNum, self.bs, self.K, self.N, funcUsed)
         
         with open(filename,'w') as myfile:
@@ -242,15 +250,15 @@ class SampleConstructor1D:
 #TESTING CELL
 
 xmn = 0
-xmx = 5
-simnum = 50
-binsize = 1/125
-spK = 9
-sampnum = 10000
+xmx = 3
+simnum = 150
+binsize = 1/200
+spK = 25
+sampnum = 100000
 
 testGen = SampleConstructor1D(xmn, xmx, simnum, binsize, spK, sampnum)
 firsthist = testGen.dataGen1D_v2()
-testGen.writeToFile('xp1nverseSinSq')
+testGen.writeToFile('xp1nverseSinSq2x')
 
 
         

@@ -84,6 +84,9 @@ class WhamConvergence1D:
         fnameList = list(txtFile)
         fnameList[-3:] = ['p','n','g']
         pngFileName = "".join(fnameList)
+        pathArr = pngFileName.split('/')
+        pathArr[0] = 'plot-images'
+        pngFile = '/'.join(pathArr)
         
         #class constructor will automatically plot the histogram data and
         #save the png file with the same name as the txt file
@@ -92,7 +95,7 @@ class WhamConvergence1D:
         xlabel('x')
         ylabel('histogram(x)')
         title('Histogram Data From File')
-        savefig(pngFileName)
+        savefig(pngFile)
         show()
         
         #initialize bjasing matrix for the grid as a 2d array with dimensions
@@ -196,9 +199,9 @@ class WhamConvergence1D:
                     for i2 in self.simi:
                         sum2 = sum2 + (self.N*exp(g[i2]*self.Cij[i2][j]))
                     if (sum2 != 0):
-                        if (j == 5) and (i == 1):
-                            print('sum2')
-                            print(sum2)
+                        # if (j == 5) and (i == 1):
+                        #     print('sum2')
+                        #     print(sum2)
                         sum1 = sum1 + ((self.hist[j]*self.Cij[i][j])/sum2)
             #calculate the ith element of the derivaitive of the 
             # optimization function            
@@ -237,9 +240,10 @@ class WhamConvergence1D:
         -------
         self.gi which is closer to minimizing the optimation function than 
         before, because we're using the self.gi we don't actually return
-        it from the function,
+        it from the function
+        gi0 = array(size(self.gi)), self.gi at start of line search function
+        giTest = array(size(self.gi)), self.gi at end of line search function
         
-
         """
         #initialize parameters
         a0 = alpha0
@@ -252,9 +256,9 @@ class WhamConvergence1D:
         gi0 = self.gi
         
         #pk is the line search vector
-        pk = -1*dot(H,dgiA)
-        print('pk')
-        print(pk)
+        pk = dot(H,dgiA)
+        # print('pk')
+        # print(pk)
         
         #tolerance for armijo condition: f(x+(alpha * pk)) < f(x) + tol
         tol = b * dot(dgiA.T,pk)
@@ -263,11 +267,11 @@ class WhamConvergence1D:
         
         #calculate test gi by adding (alpha*pk)
         giTest = gi0 + (a0*pk)
-        print('gi0: ',gi0)
-        print('giTest: ', giTest)
+        # print('gi0: ',gi0)
+        # print('giTest: ', giTest)
         ATest = self.optFuncCalc(giTest)
-        print('ATol0: ', ATol)
-        print('ATest: ', ATest)
+        # print('ATol0: ', ATol)
+        # print('ATest: ', ATest)
         #loop index
         l = 0
         al = a0
@@ -278,20 +282,58 @@ class WhamConvergence1D:
             ATest = self.optFuncCalc(giTest)
             ATol = A0 + (alp1 * tol)
             al = alp1
-            print('l: ', l)
-            print('ATest: ', ATest)
-            print('ATol: ', ATol)
-        
+            # print('l: ', l)
+            # print('ATest: ', ATest)
+            # print('ATol: ', ATol)
+        print('line search done, ',l,' iterations')
         print('gi0: ', gi0)
         print('giTest: ', giTest)
         print('diff: ',gi0-giTest)
         
         self.gi = giTest
         
+        return gi0, giTest
+    
+    #UPDATE HESSIAN MATRIX (BFGS)
+    def updateHessian(self, Hk, gik, gikp1, dgiAk, dgiAkp1):
+        """
+
+        Parameters
+        ----------
+        Hk : matrix(simNum X simNum), inverse hessian to be updated
+        gik : array(size(self.gi))
+            self.gi before line search
+        gikp1 : array(size(self.gi))
+            self.gi after line search
+        dgiAk : array(size(self.gi))
+            result of self.dgiOptFuncCalc(gi)
+        dgiAkp1 : array(size(self.gi))
+            result of self.dgiOptFuncCalc(gip1)
+
+        Returns
+        -------
+        Hkp1: matrix(simNum X simNum), updated inverse hessian
+
+        """
+        #INITIALIZE PARAMETERS FOR INVERSE HESSIAN CALC=================
+        #identity matrix
+        iM = identity(size(self.gi))
+        #s: array with difference of gi gip1
+        s = gikp1 - gik
+        y = dgiAkp1 - dgiAk
+        gam = 1/inner(s,y)
+        
+        #set up calc as Hkp1 = (t1)hk(t2)+t3
+        t1 = iM - (gam * outer(s,y))
+        t2 = iM - (gam * outer(y,s))
+        t3 = gam*outer(s,s)
+        
+        t1Hk = inner(t1,Hk)
+        t1Hkt2 = inner(t1Hk,t2)
+        Hkp1 = t1Hkt2 + t3
         
         
-        return
-        
+        return Hkp1
                                     
                 
         
@@ -312,13 +354,16 @@ class WhamConvergence1D:
 # fname = 'xmn0_xmx5_simNum10_bs0.05_k4_n1000_xp1nverseSinSq.txt'  
 # =============================================================================
 
-xmn = 0
-xmx = 5
-simnum = 200
-binsize = 1/500
-spK = 16
-sampnum = 100000  
-fname = "xmn0_xmx5_simNum200_bs0.002_k16_n100000_xp1nverseSinSq.txt"
+# =============================================================================
+# xmn = 0
+# xmx = 5
+# simnum = 200
+# binsize = 1/500
+# spK = 16
+# sampnum = 100000  
+# fname = "xmn0_xmx5_simNum200_bs0.002_k16_n100000_xp1nverseSinSq.txt"
+# 
+# =============================================================================
 
 # =============================================================================
 # xmn = 0
@@ -327,24 +372,35 @@ fname = "xmn0_xmx5_simNum200_bs0.002_k16_n100000_xp1nverseSinSq.txt"
 # binsize = 1/125
 # spK = 9
 # sampnum = 10000
-# fname = 'xmn0_xmx5_simNum50_bs0.008_k9_n10000_xp1nverseSinSq.txt'
+# fname = 'data-files/xmn0_xmx5_simNum50_bs0.008_k9_n10000_xp1nverseSinSq.txt'
 # =============================================================================
+
+xmn = 0
+xmx = 3
+simnum = 150
+binsize = 1/200
+spK = 25
+sampnum = 100000
+fname ='data-files/xmn0_xmx3_simNum150_bs0.005_k25_n100000_xp1nverseSinSq2x.txt'
 
 tW = WhamConvergence1D(xmn,xmx,simnum,binsize,spK,sampnum,fname)
 tW.giSetGuess()
-optCalcTest = tW.optFuncCalc(tW.gi)
-print(optCalcTest)
-dOptTest = tW.dgiOptFuncCalc(tW.gi)
-print(dOptTest)
-print(tW.gi)
+
 
 hess0 = identity(size(tW.gi))
 a0c = 2
-betac = 0.000001
+betac = 0.1
 taoc = 0.5
 il = 15000
+dg0 = tW.dgiOptFuncCalc(tW.gi)
+g0, gp1 = tW.lineSearch(a0c, taoc, betac, hess0, dg0, 0, il)
+dg1 = tW.dgiOptFuncCalc(gp1)
+Hp1 = tW.updateHessian(hess0, g0, gp1, dg0, dg1)
+print(Hp1[:10,:2])
 
-tW.lineSearch(a0c, taoc, betac, hess0, dOptTest, 0, il)
+
+
+
 
    
         
