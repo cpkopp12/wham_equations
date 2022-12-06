@@ -96,7 +96,7 @@ class WhamConvergence1D:
         ylabel('histogram(x)')
         title('Histogram Data From File')
         savefig(pngFile)
-        show()
+        show(block=False)
         
         #initialize bjasing matrix for the grid as a 2d array with dimensions
         #of (number of simulations) x (number of bins), zeros for now (float)
@@ -151,6 +151,42 @@ class WhamConvergence1D:
             self.gi[i] = log(fi[i])   
         
         return
+    
+    #generate unbiased rho from histogram and gi array
+    def unBiasedRho(self, gi):
+        """
+        Calculate unbiased probability distribution from gi and histogram
+
+        Parameters
+        ----------
+        gi : array of norm constants (size(sNum))
+
+        Returns
+        -------
+        rho : array containing probabilty distribution value for bin
+                size(self.bj)
+
+        """
+        rho = zeros(size(self.bj),dtype=float)
+        fi = exp(gi)
+        
+        for j in self.bj:
+            sum1=0
+            for i in self.simi:
+                sum1 = sum1 + (self.N * fi[i] * self.Cij[i][j])
+            if (sum1 != 0): 
+                rho[j] = self.hist[j]/sum1
+        
+        figure()
+        plot(self.bc, rho)
+        xlabel('x')
+        ylabel('rho(x)')
+        title('Unbiased probability distribution')
+        show(block=False)
+        
+        
+        
+        return rho
     
     #WHAM optimization function calc
     def optFuncCalc(self, g):
@@ -358,6 +394,7 @@ class WhamConvergence1D:
         gikp1 = zeros(size(self.gi),dtype=float)
         dgiAk = self.dgiOptFuncCalc(gik)
         dgiAkp1 = zeros(size(self.gi),dtype=float)
+        rho = zeros(size(self.bj),dtype=float)
         
         #start loop
         while (q < qlim) and (abs(er) > tol):
@@ -382,13 +419,20 @@ class WhamConvergence1D:
             Hk = Hkp1
             gik = gikp1
             dgiAk = dgiAkp1
+            
+            if ( q % 10 == 0):
+                rho = self.unBiasedRho(gik)
+        
+        
+        
+        rho = self.unBiasedRho(gik)
         
         
         
         
         
         
-        return
+        return rho
         
                                     
                 
@@ -412,22 +456,32 @@ class WhamConvergence1D:
 # =============================================================================
 
 
+# =============================================================================
+# xmn = 0
+# xmx = 3
+# simnum = 60
+# binsize = 1/200
+# spK = 9
+# sampnum = 100000
+# fname ='data-files/xmn0_xmx3_simNum60_bs0.005_k9_n100000_xp1nverseSinSq2x.txt'
+# =============================================================================
+
 xmn = 0
 xmx = 3
-simnum = 60
-binsize = 1/200
-spK = 9
+simnum = 120
+binsize = 1/500
+spK = 16
 sampnum = 100000
-fname ='data-files/xmn0_xmx3_simNum60_bs0.005_k9_n100000_xp1nverseSinSq2x.txt'
+fname = 'data-files/xmn0_xmx3_simNum120_bs0.002_k16_n100000_xp1nverseSinSq2x.txt'
 
 tW = WhamConvergence1D(xmn,xmx,simnum,binsize,spK,sampnum,fname)
 tW.giSetGuess()
 
 a0c = 1
-betac = 0.001
+betac = 0.1
 taoc = 0.9
 il = 15000
-tW.BFGSConvergence(a0c, taoc, betac, il, 5, .01)
+tW.BFGSConvergence(a0c, taoc, betac, il, 500, .01)
 
 
 

@@ -253,8 +253,8 @@ class SampleConstructor1D:
 xmn = 0
 xmx = 3
 simnum = 60
-binsize = 1/200
-spK = 9
+binsize = 1/250
+spK = 16
 sampnum = 100000
 
 testGen = SampleConstructor1D(xmn, xmx, simnum, binsize, spK, sampnum)
