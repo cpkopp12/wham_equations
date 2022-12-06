@@ -400,25 +400,25 @@ class WhamConvergence1D:
 # %% 
 #TEST CELL
         
-xmn = 0
-xmx = 3
-simnum = 10
-binsize = 1/50
-spK = 2
-sampnum = 100000
-fname = "data-files/xmn0_xmx3_simNum10_bs0.02_k2_n100000_xp1nverseSinSq2x.txt"
-
-
-
 # =============================================================================
 # xmn = 0
 # xmx = 3
-# simnum = 150
-# binsize = 1/250
-# spK = 36
+# simnum = 10
+# binsize = 1/50
+# spK = 2
 # sampnum = 100000
-# fname ='data-files/xmn0_xmx3_simNum150_bs0.004_k36_n100000_xp1nverseSinSq2x.txt'
+# fname = "data-files/xmn0_xmx3_simNum10_bs0.02_k2_n100000_xp1nverseSinSq2x.txt"
+# 
 # =============================================================================
+
+
+xmn = 0
+xmx = 3
+simnum = 60
+binsize = 1/200
+spK = 9
+sampnum = 100000
+fname ='data-files/xmn0_xmx3_simNum60_bs0.005_k9_n100000_xp1nverseSinSq2x.txt'
 
 tW = WhamConvergence1D(xmn,xmx,simnum,binsize,spK,sampnum,fname)
 tW.giSetGuess()
