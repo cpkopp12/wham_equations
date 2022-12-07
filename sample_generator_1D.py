@@ -193,9 +193,9 @@ class SampleConstructor1D:
                 #random 0-fmax, accept the point
                 if rhoxt > y:
                     #accept sample even if it is not in xmn-xmx
-                    i = i + 1
-                    if (i == floor(self.N/2)):
-                        print('1/2 way')
+                    # i = i + 1
+                    # if (i == floor(self.N/2)):
+                    #     print('1/2 way')
                     if (xt < self.xmx) and (xt > self.xmn):
                         #add accepted point to the correct bin
                         #convert from float to int
@@ -204,6 +204,9 @@ class SampleConstructor1D:
                         #hi is the histogram index that xt corresponds to
                         hi = int(histbin)
                         self.hist[hi] = self.hist[hi] + 1
+                        i = i + 1
+                        if (i == floor(self.N/2)):
+                            print('1/2 way')
             
         figure()
         plot(self.bc, self.hist)
@@ -252,9 +255,10 @@ class SampleConstructor1D:
 
 xmn = 0
 xmx = 3
-simnum = 60
-binsize = 1/250
-spK = 16
+simnum = 120
+binsize = 1/500
+spK = 4
+sampnum = 100000
 sampnum = 100000
 
 testGen = SampleConstructor1D(xmn, xmx, simnum, binsize, spK, sampnum)

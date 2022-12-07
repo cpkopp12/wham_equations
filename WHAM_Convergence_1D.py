@@ -420,7 +420,7 @@ class WhamConvergence1D:
             gik = gikp1
             dgiAk = dgiAkp1
             
-            if ( q % 10 == 0):
+            if ( q % 5 == 0) or (q == 1):
                 rho = self.unBiasedRho(gik)
         
         
@@ -470,15 +470,16 @@ xmn = 0
 xmx = 3
 simnum = 120
 binsize = 1/500
-spK = 16
+spK = 4
 sampnum = 100000
-fname = 'data-files/xmn0_xmx3_simNum120_bs0.002_k16_n100000_xp1nverseSinSq2x.txt'
+fname = 'data-files/xmn0_xmx3_simNum120_bs0.002_k4_n100000_xp1nverseSinSq2x.txt'
+
 
 tW = WhamConvergence1D(xmn,xmx,simnum,binsize,spK,sampnum,fname)
 tW.giSetGuess()
 
 a0c = 1
-betac = 0.1
+betac = 0.0001
 taoc = 0.9
 il = 15000
 tW.BFGSConvergence(a0c, taoc, betac, il, 500, .01)
