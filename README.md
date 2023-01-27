@@ -10,7 +10,7 @@
 
 ## Installation
 
-These are the installation instructions.
+Just download the python modules and load your own data into them!
 
   
 
@@ -18,15 +18,18 @@ These are the installation instructions.
 
   
 
-Here is some information pertaining to the app usage.
+Download the modules. The data generator module can be used to create test data for testing the convergence algorithm module or to test your own convergence algorithms! The convergence algorithm module can be used to generate probability distributions for your own biased MD simulations!
 
   
 
 ## Credits
 
-  
+All of the math regarding the WHAM equations and advice on convergence stability came from the following paper:
+J Comput Chem. 2012 February 5; 33(4): 453–465. doi:10.1002/jcc.21989.
+Convergence and error estimation in free energy calculations using the weighted histogram analysis method
+Fangqiang Zhu and Gerhard Hummer 
 
-Remeber to cite Van.
+
 
   
   
