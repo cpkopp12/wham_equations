@@ -24,9 +24,9 @@ Download the modules. The data generator module can be used to create test data 
 
 ## Credits
 
-All of the math regarding the WHAM equations and advice on convergence stability came from the following paper:
-J Comput Chem. 2012 February 5; 33(4): 453–465. doi:10.1002/jcc.21989.
-Convergence and error estimation in free energy calculations using the weighted histogram analysis method
+All of the math regarding the WHAM equations and advice on convergence stability came from the following paper:<br/>
+J Comput Chem. 2012 February 5; 33(4): 453–465. doi:10.1002/jcc.21989. <br/>
+Convergence and error estimation in free energy calculations using the weighted histogram analysis method <br/>
 Fangqiang Zhu and Gerhard Hummer 
 
 
