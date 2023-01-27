@@ -472,7 +472,7 @@ simnum = 120
 binsize = 1/500
 spK = 4
 sampnum = 100000
-fname = 'data-files/xmn0_xmx3_simNum120_bs0.002_k4_n100000_xp1nverseSinSq2x.txt'
+fname = 'data-files/xmn0_xmx3_simNum120_bs0.002_k4_n100000_newFunc.txt'
 
 
 tW = WhamConvergence1D(xmn,xmx,simnum,binsize,spK,sampnum,fname)

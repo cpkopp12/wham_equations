@@ -108,6 +108,22 @@ class SampleConstructor1D:
         rho = (1/(x+1))*(sin(2*x)**2)
         return rho
     
+    def newFunc(self, x):
+        """
+        
+
+        Parameters
+        ----------
+        x : TYPE
+            DESCRIPTION.
+
+        Returns
+        -------
+        f(x) = (1/(1+((1-x)**2)))*((sin(2*x)**2)+2)/3
+        """
+        rho = (1/(1+(1-x)**2))*((sin(2*x)**2)+2)/3
+        return rho
+    
     #generate the histogram using xSinSq distribution
     def dataGen1D(self):
         """
@@ -186,7 +202,7 @@ class SampleConstructor1D:
                 #test point
                 xt = r.normal(mu,stdev)
                 #biased prob dist of test point
-                rhoxt = self.biasV(xt,mu)*self.xp1nverseSinSq2x(xt) 
+                rhoxt = self.biasV(xt,mu)*self.newFunc(xt)
                 #random 0-fmax
                 y = r.uniform(0,self.biasV(xt, mu))
                 #if the prob dist of the test point is greater than
@@ -263,7 +279,7 @@ sampnum = 100000
 
 testGen = SampleConstructor1D(xmn, xmx, simnum, binsize, spK, sampnum)
 firsthist = testGen.dataGen1D_v2()
-testGen.writeToFile('xp1nverseSinSq2x')
+testGen.writeToFile('newFunc')
 
 
         
