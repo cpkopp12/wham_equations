@@ -230,18 +230,30 @@ class SampleConstructor2D:
                                     print(
                                         'half done on ({},{})'.format(mX,mY))
                     
-        plt.imshow(self.hist, cmap='magma')
-        plt.title( "2-D Heat Map" )
-        plt.xlabel('x-axis')
-        plt.ylabel('y-axis')
-        plt.colorbar()
-        plt.show
+        plt.contourf(self.biX, self.biY, self.hist)
+        
+        plt.show()
+        
+        self.writeToFile()
         
         return self.hist
+    
+    
+    def writeToFile(self):
+        filename = ('2d-data-files/xmn{}_xmx{}_ymn{}_sNumX{}_sNumY{}_bsX{}_bsY{}_k{}_Ni{}_{}.txt'
+                    .format(self.xmn, self.xmx, self.ymn, self.ymx, self.sNumX,
+                            self.sNumY, self.bsX, self.bsY, self.K, self.Ni))
+        with open(filename,'w') as myfile:
+            for x in self.biX:
+                myfile.write('\n');
+                for y in self.biY:
+                    myfile.write('{} '.format(self.hist[x,y]))
+                    
+        myfile.close()
+        
+        return
         
         
-        
-            
         
         
         
@@ -272,8 +284,8 @@ snX = 30
 snY = 30
 bsX =1/100
 bsY =1/100
-k = 1
-samps =900
+k = 4
+samps = 5000
 
 t1 =   SampleConstructor2D(x0, xN, y0, yN,snX,snY,bsX,bsY,k,samps) 
 t1.dateGen2D()
