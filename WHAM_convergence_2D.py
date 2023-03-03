@@ -111,24 +111,71 @@ class WhamConvergence2D:
         
         self.Cikl = zeros((self.simiX.size*self.simiY.size, self.biX.size, 
                            self.biY.size),dtype=float)
-        self.fi = zeros((self.sNumY.size*self.sNumY.size),dtype=float)
+        self.fi = zeros((self.simiY.size*self.simiX.size),dtype=float)
         
         #load in histogram data from txt file
         with open(txtfile) as myFile:
             line = myFile.readline()
+            # print(line.split())
             ix = 0
             while line:
-                row = line.split();
-                maxyindex = row.size
-                biy = arange(0,maxyindex)
-                for iy in biy:
-                    self.hist[ix,iy] = int(row[iy])
+                line = myFile.readline()
+                row = line.split()
+                # print(row)
+                if (len(row) != 0):
+                    maxyindex = len(row)
+                    biy = arange(0,maxyindex)
+                    for iy in biy:
+                        self.hist[ix,iy] = int(row[iy])
                 ix = ix + 1
                 
-         plt.contourf(self.biX, self.biY, self.hist)
+        plt.contourf(self.biX, self.biY, self.hist)
          
-         plt.show()
-         
+        plt.show()
+        
+        return
+    
+    
+    def setBiasingMatrix(self):
+        """
+        Stores the value of the biasing potential at each bin for each 
+        simulation in self.Cikl
+        """
+        #shorten k
+        k = self.K/2
+        #cannot figure out a better way of dealing with the one d sim index i
+        #the baising matrix is going to be a huge array
+        i = 0
+        for m1 in self.muX:
+            for m2 in self.muY:
+                for k in self.biX:
+                    for l in self.biY:
+                        self.Cikl[i,k,l] = exp(-k(((self.bcX[k]-m1)**2)+
+                                                  ((self.bcY[l]-m2)**2)))
+                i = i + 1
+                
+        return
+    
+    
+        
+#%%
+# =============================================================================
+# TEST CELL
+# =============================================================================
+
+filename ='2d-data-files/xmn0_xmx3_ymn0_sNumX3_sNumY30_bsX30_bsY0.01_k0.01_Ni4_5000.txt'
+x0 = 0
+xN = 3
+y0 = 0
+yN = 3
+snX = 30
+snY = 30
+bsX =1/100
+bsY =1/100
+k = 4
+samps = 5000
+
+ct1 = WhamConvergence2D(x0, xN, y0, yN, snX, snY, bsX, bsY, k, samps, filename)
                 
         
         

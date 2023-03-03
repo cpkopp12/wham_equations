@@ -240,14 +240,14 @@ class SampleConstructor2D:
     
     
     def writeToFile(self):
-        filename = ('2d-data-files/xmn{}_xmx{}_ymn{}_sNumX{}_sNumY{}_bsX{}_bsY{}_k{}_Ni{}_{}.txt'
+        filename = ('2d-data-files/xmn{}_xmx{}_ymn{}_ymx{}_sNumX{}_sNumY{}_bsX{}_bsY{}_k{}_Ni{}_{}.txt'
                     .format(self.xmn, self.xmx, self.ymn, self.ymx, self.sNumX,
                             self.sNumY, self.bsX, self.bsY, self.K, self.Ni))
         with open(filename,'w') as myfile:
             for x in self.biX:
-                myfile.write('\n');
                 for y in self.biY:
                     myfile.write('{} '.format(self.hist[x,y]))
+                myfile.write('\n');
                     
         myfile.close()
         
@@ -280,11 +280,11 @@ x0 = 0
 xN = 3
 y0 = 0
 yN = 3
-snX = 30
-snY = 30
-bsX =1/100
-bsY =1/100
-k = 4
+snX = 15
+snY = 15
+bsX =1/200
+bsY =1/200
+k = 2
 samps = 5000
 
 t1 =   SampleConstructor2D(x0, xN, y0, yN,snX,snY,bsX,bsY,k,samps) 
